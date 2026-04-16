@@ -77,3 +77,5 @@ Uses semantic versioning:
 - PATCH: fixes and clarifications
 
 ## License
+
+MIT
