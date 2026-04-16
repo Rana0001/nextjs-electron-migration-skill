@@ -27,9 +27,42 @@ This skill is vendor-agnostic and works across coding agents/IDEs:
 
 If auto-skill loading is unsupported, use this as prompt context manually.
 
-## Installation
+## Installation (Cursor and other supported agents)
 
-Copy this folder into your agent skills directory, or keep it in your repo under `docs/skills/` and reference it in prompts.
+Install from GitHub into your current project:
+
+```bash
+npx skills add Rana0001/nextjs-electron-migration-skill --skill nextjs-electron-migration-skill
+```
+
+Install specifically for Cursor:
+
+```bash
+npx skills add Rana0001/nextjs-electron-migration-skill --skill nextjs-electron-migration-skill --agent cursor
+```
+
+Verify installation:
+
+```bash
+npx skills list
+```
+
+Expected skill name:
+
+- `nextjs-electron-migration-skill`
+
+## Troubleshooting install issues
+
+- Use `npx skills ...` (not `npx skillsadd ...`).
+- Use the exact skill name `nextjs-electron-migration-skill`.
+- Check discovery from GitHub with:
+
+```bash
+npx skills add Rana0001/nextjs-electron-migration-skill --list
+```
+
+- If your environment has restricted temp directory permissions, retry from a normal local terminal with full filesystem permissions.
+- Ensure Node.js and npm are available and updated.
 
 ## Example prompts
 
