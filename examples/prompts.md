@@ -3,7 +3,7 @@
 ## 1) Full migration plan
 
 Convert my Next.js app to a production-ready Electron desktop app.
-Use the nextjs-electron-migration skill and provide:
+Use the nextjs-electron-migration-skill and provide:
 
 - architecture decisions
 - migration steps

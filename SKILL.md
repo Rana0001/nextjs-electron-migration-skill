@@ -1,93 +1,102 @@
 ---
-name: nextjs-electron-migration
-description: Migrate Next.js applications to production-ready Electron desktop apps with secure IPC, packaging, CI, and release hardening.
-version: 1.0.0
-author: Prashant Rana Magar
+name: nextjs-electron-migration-skill
+description: Use this skill when a user wants to convert or migrate a Next.js web app into a secure production-ready Electron desktop app. Apply it for Electron setup, secure preload and IPC contracts, desktop packaging, release hardening, and CI smoke tests, even when the user only says "make this a desktop app" without explicitly mentioning Electron architecture.
 license: MIT
-tags: [nextjs, electron, desktop, migration, ipc, security, packaging, ci]
 compatibility: universal
+metadata:
+  author: Prashant Rana Magar
+  version: "1.1.0"
+  category: desktop-migration
 ---
 
-# Nextjs Electron Migration
+# Next.js to Electron Migration
 
-## Compatibility
+Migrate Next.js apps to secure, maintainable Electron desktop apps using a repeatable production workflow.
 
-This skill is designed to work across coding agents and IDEs:
+## Use this skill
 
-- Works as plain Markdown guidance if frontmatter is ignored
-- No dependency on agent-specific internal tools
-- Commands are standard shell/npm workflows
-- Can be used manually by copying sections into prompts
+- Convert a Next.js web app into a desktop app.
+- Add Electron main/preload process architecture.
+- Define secure IPC patterns and renderer bridge APIs.
+- Add packaging, signing-ready release flow, and CI smoke checks.
+- Produce a migration plan and implementation checklist, not one-off hotfixes.
 
-## Purpose
+## Do not use this skill
 
-Convert any Next.js application into a secure, maintainable, production-ready Electron desktop app using a repeatable migration workflow.
+- Minor web-only Next.js feature work without desktop requirements.
+- Generic Electron bugfixes in an existing mature Electron codebase.
+- Requests that only need PWA support instead of native desktop packaging.
 
-## Use This Skill When
+## Default architecture
 
-- User asks to convert Next.js app to desktop app
-- User needs Electron integration with Next.js
-- User asks for secure preload + IPC architecture
-- User needs desktop packaging and CI setup
-- User wants migration checklist and rollout plan
+- Keep Next.js as the renderer app.
+- Add `electron/main.(ts|js)` for lifecycle, windows, and IPC handlers.
+- Add `electron/preload.(ts|js)` with a minimal `contextBridge` API.
+- Keep all native capabilities behind explicit IPC contracts.
+- Use an adapter in renderer (for example `src/lib/desktop/client.ts`) to isolate `window` access.
 
-## Core Principles
+## Migration procedure
 
-1. Preserve Next.js renderer architecture.
-2. Keep Electron preload bridge minimal and explicit.
-3. Enforce secure BrowserWindow defaults.
-4. Standardize scripts for dev/build/dist/smoke.
-5. Validate via security, lifecycle, packaging, and CI gates.
+1. Audit app constraints: routing mode, SSR usage, API routes, environment variables, and static asset handling.
+2. Add Electron runtime files and scripts for local desktop development.
+3. Choose renderer serving model:
+   - Development: load `next dev` URL.
+   - Production default: run/build Next.js and load production server output.
+4. Implement minimal IPC contracts first:
+   - `desktop:get-app-version`
+   - `desktop:shell:open-external`
+5. Add desktop state persistence (for example, window bounds and user preferences).
+6. Add packaging pipeline (for example, `electron-builder`) with platform targets.
+7. Add smoke tests for app launch and critical IPC.
+8. Add CI matrix for macOS, Windows, and Linux packaging checks.
+9. Apply hardening gates (navigation policy, window policy, and permission boundaries).
 
-## Target Architecture
-
-- `electron/main.(js|ts)` for app lifecycle, windows, native integrations, and IPC handlers
-- `electron/preload.(js|ts)` for secure API exposure via `contextBridge`
-- `src/...` for Next.js renderer (existing app)
-- Optional `src/lib/desktop/client.(ts|js)` adapter to abstract `window.desktopAPI`
-
-## Migration Workflow
-
-1. Audit existing Next.js app (SSR, API routes, env, assets)
-2. Add Electron main and preload files
-3. Define renderer loading strategy:
-   - Dev: load `next dev` URL
-   - Prod: spawn `next start` or use static export strategy when compatible
-4. Implement minimal IPC contracts (`desktop:get-app-version`, `desktop:shell:open-external`)
-5. Add desktop persistence (`electron-store`) for window state/preferences
-6. Add packaging with `electron-builder`
-7. Add smoke tests and CI matrix (macOS/Windows/Linux)
-8. Harden navigation controls and lifecycle shutdown behavior
-
-## Security Baseline (Required)
+## Security baseline (required)
 
 - `contextIsolation: true`
 - `nodeIntegration: false`
 - `sandbox: true`
-- Strict preload API whitelist
-- IPC input validation in main process
-- `setWindowOpenHandler` for external links
-- `will-navigate` allowlist
-- Never expose raw Node APIs to renderer
+- Strict preload API whitelist; never expose raw Node.js objects to renderer.
+- Validate all IPC inputs in main process before execution.
+- Block unexpected navigation via `will-navigate`.
+- Route external URLs through `setWindowOpenHandler` and trusted allowlists.
+- Disable unneeded Electron features by default and opt in only when justified.
 
-## Output Format
+## High-value gotchas
 
-When this skill is used, return:
+- Do not put business logic in preload; preload is a narrow translation layer.
+- Avoid broad `ipcRenderer.send` channels; use named, versioned contracts.
+- Treat renderer data as untrusted input even if UI is internal.
+- Ensure graceful shutdown of spawned Next.js processes in production mode.
+- Keep development shortcuts (for example devtools auto-open) out of production builds.
 
-1. Migration scope and assumptions
+## Validation loop (must run before completion)
+
+1. Run lint/type/build checks for renderer and Electron code.
+2. Start desktop app in dev mode and verify window load + basic navigation behavior.
+3. Build production desktop package and validate cold start.
+4. Verify at least one IPC roundtrip through preload with schema/input validation.
+5. Verify external-link and navigation restrictions are enforced.
+6. Re-run failed checks after fixes until all pass.
+
+## Required output from the agent
+
+When you apply this skill, return the result in this structure:
+
+1. Scope and assumptions
 2. Architecture decisions
-3. File and script changes plan
-4. Security hardening plan
-5. Build/packaging plan
+3. File-level implementation plan
+4. Security hardening actions
+5. Build and packaging strategy
 6. Test and CI strategy
 7. Risks and mitigations
 8. Definition of done
 
-## Definition of Done
+## Definition of done
 
-- Desktop app launches in dev and production modes
-- IPC bridge works for at least one validated native capability
-- Navigation and external-link policies enforced
-- Packaging succeeds for target platforms
-- Smoke tests pass in CI
-- Release checklist completed
+- Desktop app works in development and production modes.
+- Preload bridge is minimal, explicit, and validated.
+- IPC contracts are implemented and input-validated in main process.
+- Navigation and external-link restrictions are enforced.
+- Packaging succeeds for required target platforms.
+- CI smoke checks pass for launch and critical desktop behavior.
