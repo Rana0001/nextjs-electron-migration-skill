@@ -44,7 +44,3 @@ Uses semantic versioning:
 - PATCH: fixes and clarifications
 
 ## License
-
-MIT
-# nextjs-electron-migration-skill
-# nextjs-electron-migration-skill
